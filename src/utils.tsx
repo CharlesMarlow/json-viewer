@@ -1,25 +1,25 @@
-import { JsonValue, JsonObject } from "./types";
+import { JsonValue, JsonObject } from './types';
 
 export const isJsonObject = (
   value: JsonValue | undefined
 ): value is JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export const formatJsonValue = (value: JsonValue): string => {
-  if (typeof value === "string") {
-    return value;
-  } else if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    value === null
-  ) {
-    return String(value);
-  } else if (Array.isArray(value)) {
-    return JSON.stringify(value, null, 2);
-  } else if (isJsonObject(value)) {
-    return JSON.stringify(value, null, 2);
+  switch (typeof value) {
+    case 'string':
+      return value;
+    case 'number':
+    case 'boolean':
+      return String(value);
+    case 'object':
+      if (value === null) return 'null';
+      if (Array.isArray(value)) return JSON.stringify(value, null, 2);
+      if (isJsonObject(value)) return JSON.stringify(value, null, 2);
+      return '';
+    default:
+      return '';
   }
-  return "";
 };
 
 export const formatPath = (path: string[]): string => {
@@ -29,7 +29,7 @@ export const formatPath = (path: string[]): string => {
     } else {
       return acc ? `${acc}.${key}` : `${key}`;
     }
-  }, "");
+  }, '');
 };
 
 export const getValueFromPath = (
@@ -50,7 +50,7 @@ export const getValueFromPath = (
       }
     }
   } catch (error) {
-    console.error("Error traversing path:", error);
+    console.error('Error traversing path:', error);
     value = undefined;
   }
 
@@ -72,7 +72,7 @@ export const renderJsonData = (
       <div>
         <span>[</span>
         {data.map((item, index) => (
-          <div key={index} style={{ marginLeft: "20px" }}>
+          <div key={index} style={{ marginLeft: '20px' }}>
             {renderJsonData(item, onKeyClick, [...path, index.toString()])}
             {index < data.length - 1 && <span>,</span>}
           </div>
@@ -86,7 +86,7 @@ export const renderJsonData = (
   if (isJsonObject(data)) {
     return (
       <div>
-        <span>{"{"}</span>
+        <span>{'{'}</span>
         {Object.keys(data).map((key, index, keys) => {
           const value = data[key as keyof typeof data];
 
@@ -94,9 +94,9 @@ export const renderJsonData = (
           const isClickable = !(Array.isArray(value) || isJsonObject(value));
 
           return (
-            <div key={key} style={{ marginLeft: "20px" }}>
+            <div key={key} style={{ marginLeft: '20px' }}>
               <strong
-                className={isClickable ? "json-key" : ""}
+                className={isClickable ? 'json-key' : ''}
                 onClick={() => {
                   if (isClickable) {
                     onKeyClick([...path, key]);
@@ -104,19 +104,19 @@ export const renderJsonData = (
                 }}
               >
                 "{key}":
-              </strong>{" "}
+              </strong>{' '}
               {renderJsonData(value, onKeyClick, [...path, key])}
               {index < keys.length - 1 && <span>,</span>}
             </div>
           );
         })}
-        <span>{"}"}</span>
+        <span>{'}'}</span>
       </div>
     );
   }
 
   // Handle strings
-  if (typeof data === "string") {
+  if (typeof data === 'string') {
     return <span>"{data}"</span>;
   }
 
